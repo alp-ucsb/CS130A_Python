@@ -10,7 +10,7 @@ def strip_non_letters(word):
    return ''.join(letters)
 
 def reverse(word):
-   return ''.join(word[i] for i in range(len(word) - 1, -1, -1))
+   return ''.join(reversed(word))
 
 def is_palindrome(words):
    letters = strip_non_letters(''.join(words))
