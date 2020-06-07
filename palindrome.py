@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 __doc__ = "Program to check if a sentence is a palindrome"
 
 import sys
