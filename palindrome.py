@@ -12,12 +12,14 @@ def strip_non_letters(word):
 def reverse(word):
    return ''.join(word[i] for i in range(len(word) - 1, -1, -1))
 
-def check_palindrome(words):
+def is_palindrome(words):
    letters = strip_non_letters(''.join(words))
-   palindrome = letters == reverse(letters)
-   print('The phrase "{}" reduces to "{}"'.format(' '.join(words), letters))
-   print('and is{} a palindrome'.format('' if palindrome else ' not'))
+   return letters == reverse(letters)
    
 if __name__ == '__main__':
-   check_palindrome(sys.argv[1:])
+   single_word = strip_non_letters(''.join(sys.argv[1:]))
+   print('The phrase "{}" reduces to "{}"'.format(
+      ' '.join(sys.argv[1:]), single_word))
+   print('and is{} a palindrome'.format(
+      '' if is_palindrome(single_word) else ' not'))
     
