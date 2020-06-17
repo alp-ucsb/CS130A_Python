@@ -258,9 +258,54 @@ class Array(VisualizationApp):
             return True
         return False
 
+    def traverse(self):
+        self.cleanUp()
+
+        # draw an index pointing to the first cell
+        indexDisplay = self.createIndex(0, 'j')
+        self.cleanup |= set(indexDisplay)
+
+        # draw output box
+        canvasDimensions = self.widgetDimensions(self.canvas)
+        outputBox = self.canvas.create_rectangle(\
+            ARRAY_X0+ CELL_SIZE//2, ARRAY_Y0 + canvasDimensions[1] // 3, ARRAY_X0 + CELL_SIZE*len(self.list), \
+            ARRAY_Y0 + canvasDimensions[1] // 3 + 50,\
+            fill = OPERATIONS_BG)
+        self.cleanup.add(outputBox)
+
+        for j in range(len(self.list)):
+            # calculate where the value will need to move to
+            outputBoxCoords = self.canvas.coords(outputBox)
+            midOutputBox = (outputBoxCoords[3]-outputBoxCoords[1])//2+outputBoxCoords[1]
+
+            # create the value to move to output box
+            valueOutput = self.copyCanvasItem(self.list[j].display_val)
+            valueList = (valueOutput,)
+            self.cleanup.add(valueOutput)
+
+            # move value to output box
+            toPositions = (outputBoxCoords[0] + (j+1)*(CELL_SIZE*3)//4, midOutputBox)
+            self.moveItemsTo(valueList, (toPositions,), sleepTime=.05)
+
+            # make the value 25% smaller
+            newSize = (VALUE_FONT[0], int(VALUE_FONT[1]*.75))
+            self.canvas.itemconfig(valueOutput, font=newSize)
+            self.window.update()
+
+            # wait and then move the index pointer over
+            time.sleep(self.speed(.5))
+            for item in indexDisplay:
+                self.canvas.move(item, CELL_SIZE, 0)
+            self.window.update()
+            # wait a moment so the user can see the index pointer moved
+            time.sleep(self.speed(.5))
+            
+
     def makeButtons(self):
         vcmd = (self.window.register(numericValidate),
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+        traverseButton = self.addOperation(
+            "Traverse", lambda: self.traverse())
         findButton = self.addOperation(
             "Find", lambda: self.clickFind(), numArguments=1,
             validationCmd=vcmd)
@@ -273,7 +318,7 @@ class Array(VisualizationApp):
         deleteRightmostButton = self.addOperation(
             "Delete Rightmost", lambda: self.removeFromEnd())
         return [findButton, insertButton, deleteValueButton,
-                deleteRightmostButton]
+                deleteRightmostButton, traverseButton]
 
     def validArgument(self):
         entered_text = self.getArgument()
