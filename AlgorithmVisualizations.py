@@ -2,7 +2,7 @@
 __doc__ = """
 Program to show algorithm visualizations in a tabbed Tk notebook presentation
 form.
-This progam loads all the visualization modules in a give set of directories.
+This program loads all the visualization modules in a Python package.
 It searches the modules for classes that are subclasses of VisualizationApp 
 and instantiates each one in a separate tab.  When the user clicks on a
 tab, it calls the class's runVisualization method.
@@ -37,14 +37,10 @@ INTRO_FONT = ('Helvetica', 16)
 intro_msg = """
 Welcome to the algorithm visualizations for the book:
 Data Structures and Algorithms in Python
-
 Please use these visualization tools along with the
 book to improve your understanding of how computers
 organize and manipulate data efficiently.
-
 Select tabs at the top to see the different data structures.
-
-
 Exceptional students in the Computer Science Department of
 Stern College at Yeshiva University developed these visualizations.
 https://www.yu.edu/stern/ug/computer-science
@@ -114,3 +110,4 @@ if __name__ == '__main__':
 
     showVisualizations(findVisualizations(PythonVisualizations, args.verbose),
                        start=args.start, title=args.title)
+                       
