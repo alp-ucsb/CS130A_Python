@@ -14,7 +14,6 @@ from tkinter import ttk
 from PythonVisualizations import VisualizationApp
 import PythonVisualizations
 
-# this is a test
 def findVisualizations(module, verbose=0):
     classes = []
     for name in dir(module):
