@@ -23,14 +23,36 @@ class Queue(object):
         self.front = 1  # when Queue is empty, front 
         self.rear = 0   # should be to right of rear.
         self.nItems = 0
+
         
     def __str__(self):
         return str(self.list)
     
-    # ANIMATION METHODS
+# ANIMATION METHODS
+    def createIndex(  # Create an index arrow to point at an indexed
+        self, index, name=None): # cell with an optional name label
+            d=self.list[0]
+            cell_coords=canvas.coords(d.display_shape)
+            print(cell_coords)
+            
+            #cell_coords = self.cellCoords(index)
+            """
+             cell_center = [] #self.cellCenter(index)
+            x = cell_center[0]
+            y0 = cell_coords[1] - self.CELL_SIZE * 4 // 5
+            y1 = cell_coords[1] - self.CELL_SIZE * 3 // 10
+            arrow = self.canvas.create_line(
+                x, y0, x, y1, arrow="last", fill=self.VARIABLE_COLOR)
+            if name:
+                label = self.canvas.create_text(
+                    x + 2, y0, text=name, anchor=SW,
+       #             font=self.VARIABLE_FONT, fill=self.VARIABLE_COLOR)
+        #    return (arrow, label) if name else (arrow,)
+        """
+
     def speed(self, sleepTime):
         return (sleepTime * (scaleDefault + 50)) / (scale.get() + 50)
-    
+
     def set(self, index, val):
         # reset the value of the Element at that index to val
         self.list[index].val = val
@@ -130,10 +152,17 @@ class Queue(object):
                                            fill=Queue.colors[Queue.nextColor], outline='')
             cell_val = canvas.create_text(ARRAY_X0+CELL_SIZE*self.front + (CELL_SIZE / 2), \
                                           ARRAY_Y0 + (CELL_SIZE / 2), text=val, font=('Helvetica', '20'))
-            
+
+            #print(canvas.coords(cell))
             #insert the item
+<<<<<<< Updated upstream:PythonVisualizations/newQueue.py
             self.list[self.front] = (Queue.Element(val, Queue.colors[Queue.nextColor], cell, cell_val))
             
+=======
+            self.list[self.front] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
+            #adina
+            self.createIndex(self.front,"front")
+>>>>>>> Stashed changes:PythonVisualizations/SimpleQueue.py
             self.nItems += 1
             
             # increment nextColor
