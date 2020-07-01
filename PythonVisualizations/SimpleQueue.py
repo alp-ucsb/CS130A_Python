@@ -1,6 +1,10 @@
-import time
 from tkinter import *
-from recordclass import recordclass
+try:
+    from drawable import *
+    from VisualizationApp import *
+except ModuleNotFoundError:
+    from .drawable import *
+    from .VisualizationApp import *
 
 WIDTH = 800
 HEIGHT = 400
@@ -9,13 +13,7 @@ CELL_SIZE = 50
 ARRAY_X0 = 100
 ARRAY_Y0 = 100
 
-<<<<<<< Updated upstream:PythonVisualizations/newQueue.py
-class Queue(object):
-    Element = recordclass('Element', ['val', 'color', 'display_shape', 'display_val'])
-    Element.__new__.__defaults__ = (None,) * len(Element._fields)
-=======
 class Queue(VisualizationApp):
->>>>>>> Stashed changes:PythonVisualizations/SimpleQueue.py
 
     colors = ['red', 'green', 'blue', 'orange', 'yellow', 'cyan', 'magenta',
               'dodgerblue', 'turquoise', 'grey', 'gold', 'pink']
@@ -74,7 +72,8 @@ class Queue(VisualizationApp):
     # insert item at rear of queue   
     def insertRear(self, val):
         didInsert = False
-
+        #callEnviron = self.createCallEnvironment()
+        #callEnvironI = set(indexDisplay)
         # Fix to self.rear starting at 1
         if self.nItems == 0:
             self.rear = 0
@@ -90,11 +89,11 @@ class Queue(VisualizationApp):
             
             
             #insert the item
-<<<<<<< Updated upstream:PythonVisualizations/newQueue.py
-            self.list[self.rear] = (Queue.Element(val, Queue.colors[Queue.nextColor], cell, cell_val))
-            
+
+            self.list[self.rear] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
+            indexDisplay = self.list[self.rear]
             self.nItems += 1
-            
+
             # increment nextColor
             Queue.nextColor = (Queue.nextColor + 1) % len(Queue.colors)
         
@@ -102,13 +101,10 @@ class Queue(VisualizationApp):
             
             # update window
             window.update()
-            
-        
-=======
+
             self.list[self.rear] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
             didInsert = True
 
->>>>>>> Stashed changes:PythonVisualizations/SimpleQueue.py
         #if there's a space to insert into
         elif self.nItems != self.size:
 
@@ -129,24 +125,17 @@ class Queue(VisualizationApp):
             
             
             #insert the item
-<<<<<<< Updated upstream:PythonVisualizations/newQueue.py
-            self.list[self.rear] = (Queue.Element(val, Queue.colors[Queue.nextColor], cell, cell_val))
-            
-=======
             self.list[self.rear] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
             didInsert = True
-        if didInsert:
 
->>>>>>> Stashed changes:PythonVisualizations/SimpleQueue.py
+        if didInsert:
             self.nItems += 1
             #print(self.front, self.rear, self.nItems, flush=True)
             #Create Arrows
             arrowRear = self.createIndex(self.rear, "Rear", high=False)
             arrowFront = self.createIndex(self.front, "Front", high=True)
-            self.cleanUpCallEnviron()
-            self.cleanUpCallEnviron()
-            arrowRear()
-            arrowFront()
+           # arrowRear()
+           # arrowFront()
             # increment nextColor
             Queue.nextColor = (Queue.nextColor + 1) % len(Queue.colors)
         
@@ -178,7 +167,7 @@ class Queue(VisualizationApp):
                                           ARRAY_Y0 + (CELL_SIZE / 2), text=val, font=('Helvetica', '20'))
             
             #insert the item
-            self.list[self.front] = (Queue.Element(val, Queue.colors[Queue.nextColor], cell, cell_val))
+            self.list[self.front] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
             
             self.nItems += 1
             
