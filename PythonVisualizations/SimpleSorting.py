@@ -282,10 +282,15 @@ def insert(self, item):
         return cell_rect, cell_val
 
     def display(self):
+        callEnviron = self.createCallEnvironment()
         self.canvas.delete("all")
 
         for i in range(self.size):  # Draw grid of cells
             self.createArrayCell(i)
+        
+        #draw an index pointing to the last item in the list 
+        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
+        callEnviron |= set(indexDisplay)              
 
         # go through each Drawable in the list
         for i, n in enumerate(self.list):
@@ -295,6 +300,8 @@ def insert(self, item):
             n.color = self.canvas.itemconfigure(n.display_shape, 'fill')
 
         self.window.update()
+        self.cleanUp(callEnviron)
+        
 
     findCode = """
 def find(self, item):
