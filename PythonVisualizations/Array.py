@@ -37,26 +37,36 @@ class Array(VisualizationApp):
     # ARRAY FUNCTIONALITY
 
     def createIndex(  # Create an index arrow to point at an indexed
-            self, index, name=None):  # cell with an optional name label
+            self, index,  # cell
+            name=None,  # with an optional name label
+            level=1,  # at a particular level away from the cells
+            color=None):  # (negative are below)
+        if not color: color = self.VARIABLE_COLOR
+
         cell_coords = self.cellCoords(index)
         cell_center = self.cellCenter(index)
+        level_spacing = self.VARIABLE_FONT[1]
         x = cell_center[0]
-        y0 = cell_coords[1] - self.CELL_SIZE * 4 // 5
-        y1 = cell_coords[1] - self.CELL_SIZE * 3 // 10
+        if level > 0:
+            y0 = cell_coords[1] - self.CELL_SIZE * 3 // 5 - level * level_spacing
+            y1 = cell_coords[1] - self.CELL_SIZE * 3 // 10
+        else:
+            y0 = cell_coords[3] + self.CELL_SIZE * 3 // 5 - level * level_spacing
+            y1 = cell_coords[3] + self.CELL_SIZE * 3 // 10
         arrow = self.canvas.create_line(
-            x, y0, x, y1, arrow="last", fill=self.VARIABLE_COLOR)
+            x, y0, x, y1, arrow="last", fill=color)
         if name:
             label = self.canvas.create_text(
-                x + 2, y0, text=name, anchor=SW,
-                font=self.VARIABLE_FONT, fill=self.VARIABLE_COLOR)
+                x + 2, y0, text=name, anchor=SW if level > 0 else NW,
+                font=self.VARIABLE_FONT, fill=color)
         return (arrow, label) if name else (arrow,)
 
     def insert(self, val):
         callEnviron = self.createCallEnvironment()
         self.startAnimations()
 
-        # draw an index pointing to the last cell
-        indexDisplay = self.createIndex(len(self.list), "nItems")
+        # draw an index pointing to the last item in the list
+        indexDisplay = self.createIndex(len(self.list)-1, "nItems", level = -1, color = 'black')
         callEnviron |= set(indexDisplay)
 
         # create new cell and cell value display objects
@@ -77,22 +87,29 @@ class Array(VisualizationApp):
             val, self.canvas.itemconfigure(cellPair[0], 'fill'), *cellPair))
         callEnviron ^= set(cellPair) # Remove new cell from temp call environ
 
-        # advance index for next insert
+        # move nItems pointer 
         self.moveItemsBy(indexDisplay, (self.CELL_SIZE, 0))
         self.cleanUp(callEnviron)
 
     def removeFromEnd(self):
         callEnviron = self.createCallEnvironment()
-        self.startAnimations()
+        
+        #draw an index pointing to the last item in the list 
+        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
+        callEnviron |= set(indexDisplay)         
+        
         # pop a Drawable from the list
         if len(self.list) == 0:
             self.setMessage('Array is empty!')
             return
-        n = self.list.pop()
+        self.startAnimations() 
+        n = self.list.pop()  
 
         # delete the associated display objects
         self.canvas.delete(n.display_shape)
         self.canvas.delete(n.display_val)
+        # advance index for next insert
+        self.moveItemsBy(indexDisplay, (-self.CELL_SIZE, 0))              
 
         # update window
         self.window.update()
@@ -182,23 +199,33 @@ class Array(VisualizationApp):
         return cell_rect, cell_val
 
     def display(self):
+        callEnviron = self.createCallEnvironment()
         self.canvas.delete("all")
 
         for i in range(self.size):  # Draw grid of cells
             self.createArrayCell(i)
+            
+        # draw an index pointing to the last item in the list
+        indexDisplay = self.createIndex(len(self.list)-1, "nItems", level = -1, color = 'black')
+        callEnviron |= set(indexDisplay)        
 
         # go through each Drawable in the list
         for i, n in enumerate(self.list):
             # create display objects for the associated Drawables
             n.display_shape, n.display_val = self.createCellValue(
                 i, n.val, n.color)
-            n.color = self.canvas.itemconfigure(n.display_shape, 'fill')
-
+            n.color = self.canvas.itemconfigure(n.display_shape, 'fill')    
+        
         self.window.update()
+        self.cleanUp(callEnviron)
 
     def find(self, val):
         callEnviron = self.createCallEnvironment()
         self.startAnimations()
+        
+        # draw an index pointing to the last item in the list
+        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
+        callEnviron |= set(indexDisplay)        
 
         # draw an index for variable j pointing to the first cell
         indexDisplay = self.createIndex(0, 'j')
@@ -238,12 +265,17 @@ class Array(VisualizationApp):
     def remove(self, val):
         callEnviron = self.createCallEnvironment()
         self.startAnimations()
+        
+        # draw an index pointing to the last item in the list
+        indexDisplay = self.createIndex(len(self.list)-1, 'nItems',level = -1, color = 'black')
+        callEnviron |= set(indexDisplay)         
+        
         index = self.find(val)
         found = index != None    # Record if value was found
         if found:
             self.wait(0.3)
 
-            n = self.list[index]
+            n = self.list[index]         
 
             # Slide value rectangle up and off screen
             items = (n.display_shape, n.display_val)
@@ -257,9 +289,13 @@ class Array(VisualizationApp):
             for i in range(index+1, len(self.list)):
                 self.assignElement(i, i - 1, callEnviron)
                 self.moveItemsBy(kIndex, (self.CELL_SIZE, 0), sleepTime=0.01)
+            self.moveItemsBy(indexDisplay, (-self.CELL_SIZE, 0), sleepTime=0.01)
 
-            self.removeFromEnd()
-        
+            # delete the last cell from the list and as a drawable 
+            n = self.list.pop()  
+            self.canvas.delete(n.display_shape)
+            self.canvas.delete(n.display_val)
+            
         self.cleanUp(callEnviron)
         return found
         
@@ -276,7 +312,11 @@ class Array(VisualizationApp):
     def traverse(self):
         callEnviron = self.createCallEnvironment()
         self.startAnimations()
-
+        
+        #draw an index pointing to the last item in the list 
+        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
+        callEnviron |= set(indexDisplay) 
+        
         # draw an index pointing to the first cell
         indexDisplay = self.createIndex(0, 'j')
         callEnviron |= set(indexDisplay)

@@ -28,9 +28,12 @@ class SimpleArraySort(VisualizationApp):
 
         self.buttons = self.makeButtons()
         for i in range(size):
-            self.list.append(drawable(random.randrange(30)))
+            self.list.append(drawable(random.randrange(30))) 
+        
+        indexDisplay = self.createIndex(len(self.list), 'nItems')
+        
         self.display()
-
+        
     def __str__(self):
         return str(self.list)
 
@@ -178,7 +181,7 @@ def insert(self, item):
 
         # draw an index pointing to the last cell
         self.highlightCodeTags('item_assignment', callEnviron)
-        indexDisplay = self.createIndex(len(self.list), 'nItems')
+        indexDisplay = self.createIndex(len(self.list), 'nItems')        
         callEnviron |= set(indexDisplay)
 
         # create new cell and cell value display objects
