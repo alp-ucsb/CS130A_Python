@@ -317,8 +317,8 @@ class OrderedArray(VisualizationApp):
                 self.moveItemsBy(indexMid, (self.CELL_SIZE* deltaXMid, 0))
         
         self.window.update()
-        self.cleanUp(callEnviron)
         self.stopAnimations()
+        self.cleanUp(callEnviron)
         return lo                         #val not found 
     
             
@@ -401,17 +401,17 @@ class OrderedArray(VisualizationApp):
                 return val
 
     # Button functions
-    def clickFind(self):
+    def clickFind(self):       
         val = self.validArgument()
         if val is None:
             self.setMessage("Input value must be an integer from 0 to 99.")
+        elif len(self.list) == 0: 
+            self.setMessage("The array is empty.")
         else:
-            if self.find(val):
-                if self.list[result].val == val:
-                    msg = "Found {}!".format(val)
-            else:
-                msg = "Value {} not found".format(val)
-            self.setMessage(msg)
+            result = self.find(val)
+            if result and result < len(self.list) and self.list[result].val == val:
+                    self.setMessage("Found {}!".format(val))
+            else: self.setMessage("Value {} not found".format(val))
         self.clearArgument()
 
     def clickInsert(self):
