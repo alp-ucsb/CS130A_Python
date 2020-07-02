@@ -2,6 +2,7 @@ from tkinter import *
 try:
     from drawable import *
     from VisualizationApp import *
+
 except ModuleNotFoundError:
     from .drawable import *
     from .VisualizationApp import *
@@ -35,13 +36,17 @@ class Queue(VisualizationApp):
         #d = self.list[index]
         #cell_coords = d.display_shape #self.cellCoords(index)
         #cell_center = [] #self.cellCenter(index)
-        coords = canvas.coords(self.list[index].display_val)
-        x0 = coords[0]
-        x1 = coords[0]
-        y0 = coords[1] - CELL_SIZE * 3 // 2
-        y1 = coords[1] - CELL_SIZE * 5 // 10
+        #coords = canvas.coords(self.list[index].display_val)
+        coords=[ARRAY_X0+CELL_SIZE*index, ARRAY_Y0, ARRAY_X0+CELL_SIZE*(index+1), ARRAY_Y0 + CELL_SIZE]
+
+        x0 = coords[0]+CELL_SIZE
+        x1 = coords[0]+CELL_SIZE
+        y0 = coords[1] - CELL_SIZE * 2 // 2
+        y1 = coords[1] - CELL_SIZE * 1 // 4
         if high:
             y0 -= 20
+            x1=coords[0]
+            x0=x1
         arrow = canvas.create_line(
             x0, y0, x1, y1, arrow="last", fill=self.VARIABLE_COLOR)
         if name:
@@ -78,7 +83,8 @@ class Queue(VisualizationApp):
         if self.nItems == 0:
             self.rear = 0
             self.front = self.rear # circular
-            
+           # rearArrow = self.createIndex(self.rear, "Rear", high=False)
+           # frontArrow = self.createIndex(self.front, "Front", high=True)
             # create new cell and cell value display objects
             # Start drawing new one at rear
             cell = canvas.create_rectangle(ARRAY_X0+CELL_SIZE*self.rear, ARRAY_Y0, \
@@ -91,9 +97,10 @@ class Queue(VisualizationApp):
             #insert the item
 
             self.list[self.rear] = drawable(val, Queue.colors[Queue.nextColor], cell, cell_val)
-            indexDisplay = self.list[self.rear]
-            self.nItems += 1
 
+            self.nItems += 1
+            #self.moveItemsBy(rearArrow, (CELL_SIZE, 0), sleepTime=0.03)
+            #self.moveItemsBy(frontArrow, (CELL_SIZE, 0), sleepTime=0.03)
             # increment nextColor
             Queue.nextColor = (Queue.nextColor + 1) % len(Queue.colors)
         
@@ -114,7 +121,8 @@ class Queue(VisualizationApp):
                 
             #increment rear
             self.rear += 1
-            
+            #rearArrow = self.createIndex(self.rear, "Rear", high=False)
+            #frontArrow = self.createIndex(self.front, "Front", high=True)
             # create new cell and cell value display objects
             # Start drawing new one at rear
             cell = canvas.create_rectangle(ARRAY_X0+CELL_SIZE*self.rear, ARRAY_Y0, \
@@ -131,14 +139,17 @@ class Queue(VisualizationApp):
         if didInsert:
             self.nItems += 1
             #print(self.front, self.rear, self.nItems, flush=True)
-            #Create Arrows
-            arrowRear = self.createIndex(self.rear, "Rear", high=False)
-            arrowFront = self.createIndex(self.front, "Front", high=True)
+            #Create Arrow
+            #arrowRear = self.createIndex(self.rear, "Rear", high=False)
+            #arrowFront = self.createIndex(self.front, "Front", high=True)
            # arrowRear()
            # arrowFront()
             # increment nextColor
             Queue.nextColor = (Queue.nextColor + 1) % len(Queue.colors)
-        
+            rearArrow = self.createIndex(self.rear, "Rear", high=False)
+            frontArrow = self.createIndex(self.front, "Front", high=True)
+            self.moveItemsBy(rearArrow, (CELL_SIZE, 0))
+            self.moveItemsBy(frontArrow,(CELL_SIZE, 0))
             self.onOffButtons()
             
             # update window
@@ -191,9 +202,11 @@ class Queue(VisualizationApp):
         #get the value at front, and then set it to None so it will be garbage collected
         n = self.list[self.front]
         self.list[self.front] = None
-        
+
         #increment front
         self.front += 1
+        rearArrow = self.createIndex(self.rear, "Rear", high=False)
+        frontArrow = self.createIndex(self.front, "Front", high=True)
         
         #deal with wraparound
         if self.front == self.size:
@@ -204,9 +217,10 @@ class Queue(VisualizationApp):
         # delete the associated display objects
         canvas.delete(n.display_shape)
         canvas.delete(n.display_val)
-        
+
         self.onOffButtons()
-        
+        self.moveItemsBy(rearArrow, (CELL_SIZE, 0))
+        self.moveItemsBy(frontArrow, (CELL_SIZE, 0))
         # update window
         window.update()
     
@@ -219,7 +233,7 @@ class Queue(VisualizationApp):
         #get the value at rear, and then set it to None so it will be garbage collected
         n = self.list[self.rear]
         self.list[self.rear] = None
-        
+
         #decrement rear
         self.rear -= 1
         
@@ -232,7 +246,7 @@ class Queue(VisualizationApp):
         # delete the associated display objects
         canvas.delete(n.display_shape)
         canvas.delete(n.display_val)
-        
+
         self.onOffButtons()
         
         # update window
@@ -248,14 +262,14 @@ class Queue(VisualizationApp):
 
         # go through each Element in the list
         for n in self.list:
-            
+
             # Only loop through the existing elements
             if n:
+
                 print(n)
                 # create display objects for the associated Elements
                 cell = canvas.create_rectangle(xpos, ypos, xpos+CELL_SIZE, ypos+CELL_SIZE, fill=n[1], outline='')
                 cell_val = canvas.create_text(xpos+(CELL_SIZE/2), ypos+(CELL_SIZE/2), text=n[0], font=('Helvetica', '20'))
-    
                 # save the display objects to the appropriate attributes of the Element object
                 n.display_shape = cell
                 n.display_val = cell_val
