@@ -38,20 +38,16 @@ class Queue(VisualizationApp):
     # ARRAY FUNCTIONALITY
     def createIndex(  # Create an index arrow to point at an indexed
     self, index=-1, name= None, high= True):  # cell with an optional name label
-        #d = self.list[index]
-        #cell_coords = d.display_shape #self.cellCoords(index)
-        #cell_center = [] #self.cellCenter(index)
-        #coords = canvas.coords(self.list[index].display_val)
+
         coords=[ARRAY_X0+CELL_SIZE*index, ARRAY_Y0, ARRAY_X0+CELL_SIZE*(index+1), ARRAY_Y0 + CELL_SIZE]
 
         x0 = coords[0]
         x1 = coords[0]
         y0 = coords[1] - CELL_SIZE * 2 // 2
         y1 = coords[1] - CELL_SIZE * 1 // 4
-        if high:
+        if high: #changes height of arrow
             y0 -= 20
-           # x1=coords[0]
-           # x0=x1
+
         arrow = self.canvas.create_line(
             x0, y0, x1, y1, arrow="last", fill=self.VARIABLE_COLOR)
         if name:
@@ -123,14 +119,13 @@ class Queue(VisualizationApp):
             #deal with wraparound
             if self.rear == self.size-1:
                 self.rear = -1
-                self.canvas.delete(self.rearArrow[0])
-                self.canvas.delete(self.rearArrow[1])
-                self.rearArrow = self.createIndex(self.rear, "Rear", high=False)
+                #move rear arrow back to the beginning
+                self.moveItemsBy(self.rearArrow, (CELL_SIZE*self.size*-1, 0), steps=1)
+
                 
             #increment rear
             self.rear += 1
-            #rearArrow = self.createIndex(self.rear, "Rear", high=False)
-            #frontArrow = self.createIndex(self.front, "Front", high=True)
+
             # create new cell and cell value display objects
             # Start drawing new one at rear
             cell = self.canvas.create_rectangle(ARRAY_X0+CELL_SIZE*self.rear, ARRAY_Y0, \
@@ -209,25 +204,21 @@ class Queue(VisualizationApp):
 
         #increment front
         self.front += 1
-        #rearArrow = self.createIndex(self.rear, "Rear", high=False)
-        #frontArrow = self.createIndex(self.front, "Front", high=True)
         
         #deal with wraparound
         if self.front == self.size:
             self.front = 0
-            self.canvas.delete(self.frontArrow[0])
-            self.canvas.delete(self.frontArrow[1])
-            self.frontArrow = self.createIndex(self.front, "Front", high=True)
+            #move front arrow back to beginning
+            self.moveItemsBy(self.frontArrow, (CELL_SIZE*self.size*-1, 0), steps=1)
         self.nItems -= 1
         
         # delete the associated display objects
         self.canvas.delete(n.display_shape)
         self.canvas.delete(n.display_val)
-        print(self.rear, self.front)
+
         self.onOffButtons()
         self.moveItemsBy(self.frontArrow, (CELL_SIZE, 0), steps=1)
-        #self.moveItemsBy(self.rearArrow, (CELL_SIZE, 0))
-       # self.moveItemsBy(self.frontArrow, (CELL_SIZE, 0))
+
         # update window
 
         self.window.update()
@@ -312,21 +303,7 @@ class Queue(VisualizationApp):
             self.buttons[2].config(state = DISABLED)
             self.buttons[3].config(state = DISABLED)
 
-    # def pause(self, pauseButton):
-    #     global waitVar
-    #     waitVar.set(True)
-    #
-    #     pauseButton['text'] = "Play"
-    #     pauseButton['command'] = lambda: onClick(play, pauseButton)
-    #
-    #     self.canvas.wait_variable(waitVar)
 
-    # def play(pauseButton):
-    #     global waitVar
-    #     waitVar.set(False)
-    #
-    #     pauseButton['text'] = 'Pause'
-    #     pauseButton['command'] = lambda: onClick(pause, pauseButton)
  # this might be in visualizationapp
     def onClick(self,command, parameter = None):
         self.cleanUp()
@@ -337,14 +314,7 @@ class Queue(VisualizationApp):
             command()
         #if command not in [pause, play]:
          #   enableButtons()
-#vizualization app
-    # def cleanUp(self):
-    #     global cleanup
-    #     if len(cleanup) > 0:
-    #         for o in cleanup:
-    #             self.canvas.delete(o)
-    #     outputText.set('')
-    #     self.window.update()
+
 
     # Button functions
 
@@ -393,13 +363,7 @@ class Queue(VisualizationApp):
         self.window.destroy()
         self.exit()
 
-    # def disableButtons():
-    #     for button in buttons:
-    #         button.config(state = DISABLED)
-    #
-    # def enableButtons():
-    #     for button in buttons:
-    #         button.config(state = NORMAL)
+
 
     def makeButtons(self):
         vcmd = (self.window.register(numericValidate),
@@ -445,68 +409,7 @@ def validate(action, index, value_if_allowed,
     else:
         return False
 
-#window = Tk()
-#frame = Frame(window)
-#frame.pack()
 
-# 4waitVar = BooleanVar()
-#
-# canvas =Canvas(frame, width=WIDTH, height=HEIGHT)
-# window.title("Queue and Deque")
-# canvas.pack()
-#
-# bottomframe = Frame(window)
-# bottomframe.pack(side=BOTTOM)
-#
-# # Frame for operations
-# operationsUpper = LabelFrame(bottomframe, text="Queue and Deque", padx=4, pady=4)
-# operationsUpper.pack(side=TOP)
-#
-# # Frame for buttons to enable and disable queue and deque
-# controlButtons = Frame(operationsUpper, bd=5)
-# controlButtons.pack(side=TOP)
-#
-# # Text frame
-# textFrame = Frame(operationsUpper, bd=5)
-# textFrame.pack(side=TOP)
-#
-# # Frame for Queue operations
-# operationsLeft = Frame(operationsUpper, bd=5)
-# operationsLeft.pack(side=LEFT)
-#
-# # Frame for Deque operations
-# operationsRight = Frame(operationsUpper, bd=5)
-# operationsRight.pack(side=RIGHT)
-#
-# operationsLower = Frame(bottomframe)
-# operationsLower.pack(side=BOTTOM)
-#
-# vcmd = (self.window.register(validate),
-#         '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-# textBox = Entry(textFrame, width=20, bg="white", validate='key', validatecommand=vcmd)
-# textBox.grid(row=1, column=2, padx=5, sticky=E)
-#
-#
-# outputText = StringVar()
-# outputText.set('')
-# output = Label(operationsLower, textvariable=outputText, font="none 10 italic", fg="blue")
-# output.grid(row=0, column=3, sticky=(E, W))
-# operationsLower.grid_columnconfigure(3, minsize=160)
-#
-# ## exit button
-# #Button(operationsLower, text="EXIT", width=0, command=close_window)\
-#     #.grid(row=0, column=4, sticky=E)
-#
-# cleanup = []
-# queue = Queue()
-# buttons = queue.makeButtons()
-# queue.display()
-# queue.clickEnableQueue()
-#
-# #for i in range():
-#    queue.insertRear(i)
-
-#window.mainloop()
 
 if __name__ == '__main__':
     queue = Queue()
