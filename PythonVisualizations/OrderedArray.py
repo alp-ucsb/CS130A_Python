@@ -344,8 +344,8 @@ class OrderedArray(VisualizationApp):
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
         newSizeArrayButton = self.addOperation(
             "New", lambda: self.clickNew(), numArguments=1, validationCmd=vcmd)        
-        findButton = self.addOperation(
-            "Find", lambda: self.clickFind(), numArguments=1, validationCmd=vcmd)
+        searchButton = self.addOperation(
+            "Search", lambda: self.clickSearch(), numArguments=1, validationCmd=vcmd)
         randomFillButton = self.addOperation(
             "Random Fill", lambda: self.randomFill())        
         insertButton = self.addOperation(
@@ -356,7 +356,7 @@ class OrderedArray(VisualizationApp):
             "Delete Rightmost", lambda: self.removeFromEnd())
         #this makes the pause, play and stop buttons 
         self.addAnimationButtons()
-        return [findButton, insertButton, deleteValueButton, newSizeArrayButton, randomFillButton,
+        return [searchButton, insertButton, deleteValueButton, newSizeArrayButton, randomFillButton,
                 deleteRightmostButton]
 
     def validArgument(self):
@@ -367,7 +367,7 @@ class OrderedArray(VisualizationApp):
                 return val
 
     # Button functions
-    def clickFind(self):
+    def clickSearch(self):
         val = self.validArgument()
         if val is None:
             self.setMessage("Input value must be an integer from 0 to 99.")
