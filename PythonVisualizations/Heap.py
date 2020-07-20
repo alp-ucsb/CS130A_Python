@@ -220,7 +220,7 @@ class Heap(VisualizationApp):
         self.size -= 1
 
         #if the array is now empty, delete the NoneType place holder from the array
-        if self.size <= 1 : del self.list[:]
+        if self.size < 1 : del self.list[:]
 
         # Slide value rectangle up and off screen
         items = (n.display_shape, n.display_val)
@@ -233,9 +233,8 @@ class Heap(VisualizationApp):
         self.startAnimations()
         callEnviron = self.createCallEnvironment()
 
-        if self.size < 2:
+        if self.size < 1:
             self.setMessage("Heap requirement satisfied")
-
         else:
             self.swapRoot()
             self.trickleDown()
@@ -246,7 +245,6 @@ class Heap(VisualizationApp):
     def swapRoot(self):
         self.startAnimations()
         callEnviron = self.createCallEnvironment()
-
         n = self.list[-1]
         items = (n.display_shape, n.display_val)
         
