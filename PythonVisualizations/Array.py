@@ -7,8 +7,7 @@ try:
 except ModuleNotFoundError:
     from .drawable import *
     from .VisualizationApp import *
-
-
+    
 class Array(VisualizationApp):
     CELL_SIZE = 50
     CELL_BORDER = 2
@@ -24,6 +23,8 @@ class Array(VisualizationApp):
         self.title = title
         self.list = []
         self.buttons = self.makeButtons()
+        self.nItems = 0
+        
 
         # Fill in initial array values with random integers
         # The display items representing these array cells are created later
@@ -77,10 +78,6 @@ def insert(self, item):
         callEnviron = self.createCallEnvironment(
             self.insertCode.strip(), self.insertCodeSnippets)
 
-        # draw an index pointing to the last item in the list
-        indexDisplay = self.createIndex(len(self.list)-1, "nItems", level = -1, color = 'black')
-        callEnviron |= set(indexDisplay)
-
         self.highlightCodeTags('add_item', callEnviron)
 
         # create new cell and cell value display objects
@@ -104,18 +101,16 @@ def insert(self, item):
 
         # advance index for next insert
         self.highlightCodeTags('increment_count', callEnviron)
-        self.moveItemsBy(indexDisplay, (self.CELL_SIZE, 0))
+        
+        # Move nItems pointer
+        self.moveItemsBy(self.nItems, (self.CELL_SIZE, 0))
         self.wait(0.1)
 
         self.highlightCodeTags([], callEnviron)
         self.cleanUp(callEnviron)
 
     def removeFromEnd(self):
-        callEnviron = self.createCallEnvironment()
-        
-        #draw an index pointing to the last item in the list 
-        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
-        callEnviron |= set(indexDisplay)         
+        callEnviron = self.createCallEnvironment()   
                
         if len(self.list) == 0:
             self.setMessage('Array is empty!')
@@ -126,8 +121,8 @@ def insert(self, item):
         # pop a Drawable from the list
         n = self.list.pop()
         
-        # advance index for next insert
-        self.moveItemsBy(indexDisplay, (-self.CELL_SIZE, 0))                  
+        # advance nItems for next insert
+        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))                  
         
         items = (n.display_shape, n.display_val)
         callEnviron |= set(items)
@@ -226,9 +221,8 @@ def insert(self, item):
             self.createArrayCell(i)
             
         # draw an index pointing to the last item in the list
-        indexDisplay = self.createIndex(len(self.list)-1, "nItems", level = -1, color = 'black')
-        callEnviron |= set(indexDisplay)        
-
+        self.nItems = self.createIndex(len(self.list), 'nItems', level = -1, color = 'black')
+        
         # go through each Drawable in the list
         for i, n in enumerate(self.list):
             # create display objects for the associated Drawables
@@ -306,15 +300,10 @@ def find(self, item):
 
     def find(self, val):
         self.startAnimations()
-        
-        # draw an index pointing to the last item in the list
-        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
-        
+       
         callEnviron = self.createCallEnvironment(
             self.findCode.strip(), self.findCodeSnippets)
         
-        callEnviron |= set(indexDisplay)    
-
         # draw an index for variable j pointing to the first cell
         indexDisplay = self.createIndex(0, 'j')
         callEnviron |= set(indexDisplay)
@@ -387,14 +376,10 @@ def delete(self, item):
 
     def remove(self, val):
         self.startAnimations()
-        
-        # draw an index pointing to the last item in the list
-        indexDisplay = self.createIndex(len(self.list)-1, 'nItems',level = -1, color = 'black')
                 
         callEnviron = self.createCallEnvironment(
             self.removeCode.strip(), self.removeCodeSnippets)
         
-        callEnviron |= set(indexDisplay)         
         
         # draw an index for variable j pointing to the first cell
         Jindex = self.createIndex(0, 'j')
@@ -457,8 +442,8 @@ def delete(self, item):
                     self.highlightCodeTags('shift_loop_increment', callEnviron)
                     self.wait(0.1)
                 
-                self.moveItemsBy(indexDisplay, (-self.CELL_SIZE, 0), sleepTime=0.01)                    
-                
+                # Move nItems pointer
+                self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0), sleepTime=0.01)                    
                 
                 self.highlightCodeTags('success', callEnviron)
                 # remove the last item in the list
@@ -512,15 +497,9 @@ def traverse(self, function=print):
     }
     def traverse(self):
         self.startAnimations()
-        
-        #draw an index pointing to the last item in the list 
-        indexDisplay = self.createIndex(len(self.list)-1, 'nItems', level = -1, color = 'black')
-
+     
         callEnviron = self.createCallEnvironment(
-            self.traverseCode.strip(), self.traverseCodeSnippets)
-        
-        callEnviron |= set(indexDisplay) 
-        
+            self.traverseCode.strip(), self.traverseCodeSnippets)        
         
         # draw an index pointing to the first cell
         indexDisplay = self.createIndex(0, 'j')
