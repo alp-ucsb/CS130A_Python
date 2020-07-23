@@ -202,7 +202,7 @@ def insert(self, item):
         self.moveItemsTo(cellPair, toPositions, steps=self.CELL_SIZE, sleepTime=0.01)
 
         # add a new Drawable with the new value, color, and display objects
-        self.list.append(drawable(val, self.canvas.itemconfigure(cellPair[0], 'fill'), *cellPair))
+        self.list.append(drawable(val, self.canvas.itemconfigure(cellPair[0], 'fill') [-1], *cellPair))
         callEnviron ^= set(cellPair) # Remove new cell from temp call environ
 
         # advance index for next insert
@@ -213,20 +213,23 @@ def insert(self, item):
         self.cleanUp(callEnviron)
 
     def removeFromEnd(self):
-        callEnviron = self.createCallEnvironment()        
         
         # pop a Drawable from the list
         if len(self.list) == 0:
             self.setMessage('Array is empty!')
-            return
+            return        
+        callEnviron = self.createCallEnvironment()        
+
         self.startAnimations() 
+        
+        # advance index for next insert
+        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))              
+        
         n = self.list.pop()  
 
         # delete the associated display objects
         self.canvas.delete(n.display_shape)
         self.canvas.delete(n.display_val)
-        # advance index for next insert
-        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))              
 
         # update window
         self.window.update()

@@ -145,22 +145,24 @@ class OrderedArray(VisualizationApp):
         self.cleanUp(callEnviron)
         self.stopAnimations()
     def removeFromEnd(self):
-        callEnviron = self.createCallEnvironment()         
         
         # pop a Drawable from the list
         if len(self.list) == 0:
             self.setMessage('Array is empty!')
             return
-        self.startAnimations()        
+        callEnviron = self.createCallEnvironment()         
+        
+        self.startAnimations()  
+   
+        #move nItems pointer
+        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))
+        
         n = self.list.pop()
 
         # delete the associated display objects
         self.canvas.delete(n.display_shape)
         self.canvas.delete(n.display_val)
-        
-        #move nItems pointer
-        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))
-
+     
         # update window
         self.window.update()
         self.stopAnimations()
@@ -250,7 +252,6 @@ class OrderedArray(VisualizationApp):
         return cell_rect, cell_val
 
     def display(self):
-        callEnviron = self.createCallEnvironment()
         self.canvas.delete("all")
 
         for i in range(self.size):  # Draw grid of cells
@@ -269,7 +270,6 @@ class OrderedArray(VisualizationApp):
 
 
         self.window.update()
-        self.cleanUp(callEnviron)
 
     def randomFill(self):
         callEnviron = self.createCallEnvironment()        
@@ -344,9 +344,8 @@ class OrderedArray(VisualizationApp):
     def remove(self, val):
         callEnviron = self.createCallEnvironment()         
     
-        index = self.find(val)
         self.startAnimations()
-        self.cleanUp(callEnviron)
+        index = self.find(val)        
         
         found = self.list[index].val == val
         if found:    # Record if value was found

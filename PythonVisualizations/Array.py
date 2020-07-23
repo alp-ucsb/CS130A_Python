@@ -110,29 +110,29 @@ def insert(self, item):
         self.cleanUp(callEnviron)
 
     def removeFromEnd(self):
-        callEnviron = self.createCallEnvironment()   
-               
+
+        # pop a Drawable from the list
         if len(self.list) == 0:
             self.setMessage('Array is empty!')
             return
+        callEnviron = self.createCallEnvironment()         
         
-        self.startAnimations()
+        self.startAnimations() 
         
-        # pop a Drawable from the list
+        #move nItems pointer
+        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))        
+        
         n = self.list.pop()
-        
-        # advance nItems for next insert
-        self.moveItemsBy(self.nItems, (-self.CELL_SIZE, 0))                  
-        
-        items = (n.display_shape, n.display_val)
-        callEnviron |= set(items)
 
-        # Animate removal of cell value
-        self.moveItemsOffCanvas(items, N, sleepTime=0.01)
-        
+        # delete the associated display objects
+        self.canvas.delete(n.display_shape)
+        self.canvas.delete(n.display_val)
+
         # update window
+        self.window.update()
+        self.stopAnimations()
         self.cleanUp(callEnviron)
-
+        
     def assignElement(
             self, fromIndex, toIndex, callEnviron,
             steps=CELL_SIZE // 2, sleepTime=0.01):
@@ -214,7 +214,6 @@ def insert(self, item):
         return cell_rect, cell_val
 
     def display(self):
-        callEnviron = self.createCallEnvironment()
         self.canvas.delete("all")
 
         for i in range(self.size):  # Draw grid of cells
@@ -231,7 +230,6 @@ def insert(self, item):
             n.color = self.canvas.itemconfigure(n.display_shape, 'fill')    
         
         self.window.update()
-        self.cleanUp(callEnviron)
 
     getCode = """
 def get(self, n):
