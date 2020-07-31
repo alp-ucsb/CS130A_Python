@@ -1,5 +1,6 @@
 import time
 from tkinter import *
+import random 
 
 try:
     from drawable import *
@@ -26,6 +27,7 @@ class Heap(VisualizationApp):
         self.list = []
         self.maxArgWidth = maxArgWidth
         self.buttons = self.makeButtons()
+        
         self.display()
 
     def __str__(self):
@@ -72,10 +74,11 @@ class Heap(VisualizationApp):
             cells = self.canvas.find_withtag("arrayCell")
             cells_and_values = list(cells)
             for v in self.list: # move current array cells and values over
+                
                 cells_and_values.append(v.display_shape)
                 cells_and_values.append(v.display_val)
             self.moveItemsBy(cells_and_values, shift_delta, sleepTime=0.02)
-            
+          
             # Grow the the array 
             for i in range(self.size): 
                 callEnviron.add(self.createArrayCell(i)) # Temporary
@@ -181,13 +184,230 @@ class Heap(VisualizationApp):
         callEnviron -= set(copyItem)
         self.cleanUp(callEnviron)
         
+    
+     
+       
+    def siftDown(self, i=0):  # Sift item i down to preserve heap cond. defauly start at root node index
+        
+        firstLeaf = len(self.list)//2 # Get index of first leaf
+        if i >= firstLeaf: 
+            return # If item i is at or below leaf level, it cannot be moved down
+        self.startAnimations()
+        callEnviron = self.createCallEnvironment()
+        
+        item = self.list[i].copy()   # Store item at cell i
+        copyItem = (self.copyCanvasItem(item.display_shape),
+                            self.copyCanvasItem(item.display_val))
+        callEnviron |= set(copyItem)
+        itemDelta = (3 * self.CELL_WIDTH, 0)
+        self.moveItemsBy(copyItem, itemDelta, sleepTime=0.02)
+        
+        # arrows
+        iIndex = self.createIndex(i, name='i', level=-1)
+        maxChildIndex = self.createIndex((i - 1) // 2, name='maxChild', level=-2)
+        callEnviron |= set(iIndex + maxChildIndex)
+           
+        itemkey = item.val # key
+        while i < firstLeaf:  # While i above leaf level, find children
+            print('new round')
+            print(self.list[i].val)
+            left = (2*i)+1
+            right = (2*i)+2
+            maxi = left        # Assume left child has larger key
+           
+            if (right < len(self.list) and # If both children are present, and
+                self.list[left].val < # left child has smaller key
+                self.list[right].val): 
+                maxi = right    # then use right child
+            
+            print('maxi', maxi)
+
+            delta = self.cellCenter(maxi)[1] - self.canvas.coords(maxChildIndex[0])[1]  
+            if delta != 0:      # Move child index pointer
+                self.moveItemsBy(maxChildIndex, (0, delta), sleepTime=0.01) 
+                self.wait(0.2)      # Pause for comparison
+            
+            if (itemkey <      # If item i's key is less
+                self.list[maxi].val): # than max child's key,
+                self.list[i] = self.list[maxi] # then move max child up
+                #i = maxi
+                
+                # move a copy of the childs down to node i
+                print('list[i]',self.list[i].display_val)
+                             
+                copyVal = (self.copyCanvasItem(self.list[i].display_shape),
+                           self.copyCanvasItem(self.list[i].display_val))
+                callEnviron |= set(copyVal)
+                self.moveItemsOnCurve(
+                    copyVal, (self.cellCoords(i), self.cellCenter(i)),
+                    startAngle=90 * 11 / (10 + i - maxi),
+                    sleepTime=0.02)
+                self.list[maxi].val = self.list[i].val
+                self.list[maxi].color = self.list[i].color
+                self.canvas.delete(self.list[maxi].display_shape)
+                self.canvas.delete(self.list[maxi].display_val)
+                #self.list[maxi].display_shape, self.list[maxi].display_val = copyVal
+                callEnviron -= set(copyVal)
+                
+                # Advance i to child, move original item along with i Index
+                delta = self.cellCenter(maxi)[1] - self.cellCenter(i)[1]
+                self.moveItemsBy(iIndex + copyItem, (0, delta), sleepTime=0.01)
+                i = maxi                
+                 
+            else:              # If item i's key is greater than or equal
+                break           # to larger child, then found position
+            
+           
+            
+        self.list[i] = item   # Move item to its final position
+        
+        # Move copied item into appropriate location
+        self.moveItemsBy(copyItem, multiply_vector(itemDelta, -1),
+                         sleepTime=0.01)
+        self.canvas.delete(self.list[i].display_shape)
+        self.canvas.delete(self.list[i].display_val)
+        self.list[i].val, self.list[i].color = item.val, item.color
+        self.list[i].display_shape, self.list[i].display_val = copyItem
+        
+        callEnviron -= set(copyItem)
+        self.cleanUp(callEnviron)        
+    
+    
+    def heapify(self, N = None):  # Organize an array of N items to satisfy the heap condition using keys extracted from the items by the key function
+        if N is None:            # If N is not supplied,
+            N = len(self.list)   # then use number of items in list
+        heapLo = N // 2          # The heap lies in the range [heapLo, N)
+        print('list before')
+        for i in self.list:
+            print(i.val," ", end="")
+        print()
+        while heapLo > 0:        # Heapify until the entire array is a heap
+            heapLo -= 1           # Decrement heap's lower boundary
+            self.siftDown(heapLo) # Sift down item at heapLo
+        print('list after')
+        for i in self.list:
+            print(i.val, " ", end="")       
+              
     # lets user input an int argument that determines max size of the Heap
     def newArray(self):
         #gets rid of old elements in the list
         del self.list[:]
         self.size = 2
         self.display()
+    
 
+    def peek(self):
+        self.startAnimations()
+        callEnviron = self.createCallEnvironment()
+
+        # draw output box
+        canvasDimensions = self.widgetDimensions(self.canvas)
+        spacing = self.CELL_WIDTH * 3 // 4
+        padding = 10
+        boxSize = 1
+        peekIndex = 0
+        # changed the values that were added to the variables to get the output box in a desirable location
+        outputBox = self.canvas.create_rectangle(
+            (self.HEAP_X0 * 2 + padding),
+            canvasDimensions[1] - self.CELL_WIDTH - padding,
+            (self.HEAP_X0 * 2 + boxSize * spacing + padding * 2),
+            canvasDimensions[1] - padding,
+            fill=self.OPERATIONS_BG)
+        callEnviron.add(outputBox)
+
+        outputBoxCoords = self.canvas.coords(outputBox)
+        midOutputBox = (outputBoxCoords[3] + outputBoxCoords[1]) // 2
+        # create the value to move to output box
+        valueOutput = self.copyCanvasItem(self.list[peekIndex].display_val)
+        valueList = (valueOutput,)
+        callEnviron.add(valueOutput)
+        # move value to output box
+        # self.highlightCodeTags('print', callEnviron)
+        toPositions = (outputBoxCoords[0] + padding / 2 + (peekIndex + 1 / 2) * spacing,
+                        midOutputBox)
+        self.moveItemsTo(valueList, (toPositions,), sleepTime=.02)
+        # make the value 25% smaller
+        newFont = (self.VALUE_FONT[0], int(self.VALUE_FONT[1] * .75))
+        self.canvas.itemconfig(valueOutput, font=newFont)
+
+        # add label to output box
+        labelX = self.HEAP_X0 * 2 + boxSize * spacing + padding * 5
+        labelY = canvasDimensions[1] - padding * 2
+
+        boxLabel = self.canvas.create_text(
+            labelX, labelY, text="root", font=self.VARIABLE_FONT)
+        callEnviron.add(boxLabel)
+        self.highlightCodeTags([], callEnviron)
+        # finish animation
+        self.cleanUp(callEnviron)
+    
+    def removeMax(self):
+        self.startAnimations()
+        callEnviron = self.createCallEnvironment()
+
+        # remove first element from list
+        n = self.list[0]
+        self.list[0] = None
+        self.size -= 1
+        # if the array is now empty, delete the NoneType place holder from the array
+        if self.size < 1: del self.list[:]
+        # Slide value rectangle up and off screen
+        items = (n.display_shape, n.display_val)
+        toPositions = (100, -100, 100, -50)
+        callEnviron |= set(items)
+        self.moveItemsBy(items, delta=(0, -self.canvas.coords(n.display_shape)[3]), steps=self.CELL_HEIGHT,
+                        sleepTime=.05)
+        self.canvas.delete(items)
+
+        if self.size < 1:
+            self.setMessage("Heap requirement satisfied")
+
+        # move bottom cell to top, and heapify
+        else:
+            self.swapRoot()
+            self.siftDown()
+        
+        # Finish animation
+        self.cleanUp(callEnviron)
+    
+    def swapRoot(self):
+        self.startAnimations()
+        callEnviron = self.createCallEnvironment()
+        n = self.list[-1]
+        items = (n.display_shape, n.display_val)
+
+        # move the last cell to the front of the heap
+        cellCoords = self.cellCoords(0)
+        cellCenter = self.cellCenter(0)
+        toPositions = (cellCoords, cellCenter)
+        # self.moveItemsOffCanvas(items, N, sleepTime=0.02) ## alternative method to moveItemsBy
+        self.moveItemsTo(items, toPositions)
+        self.list[0] = n
+        # delete the last element from the list
+        del self.list[-1]
+        
+        # finish the animation
+        self.cleanUp(callEnviron)
+        
+    
+    def randomFill(self, val):
+        callEnviron = self.createCallEnvironment()
+        self.startAnimations()
+
+        self.size = val
+        del self.list[:]
+        self.display()
+        
+        for i in range(val):
+            num = random.randrange(99)
+            self.list.append(drawable(num))
+
+        self.display()
+            
+
+        # finish the animation
+        self.cleanUp(callEnviron)
+        
     def cellCoords(self, cell_index):  # Get bounding rectangle for array cell
         return (self.HEAP_X0, 
                 self.HEAP_Y0 + self.CELL_HEIGHT * cell_index,
@@ -291,15 +511,23 @@ class Heap(VisualizationApp):
     def makeButtons(self):
         vcmd = (self.window.register(numericValidate),
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-
         # numArguments decides the side where the button appears in the operations grid
         insertButton = self.addOperation(
             "Insert", lambda: self.clickInsert(), numArguments=1, validationCmd=vcmd)
-        newHeapButton = self.addOperation( 
-            "New", lambda: self.newArray())
-        self.addAnimationButtons()
+        newHeapButton = self.addOperation(
+            "New", lambda: self.clickNewArray())
+        peekButton = self.addOperation(
+            "Peek", lambda: self.clickPeek())
+        randomFillButton = self.addOperation(
+            "Random Fill ", lambda: self.clickRandomFill(), numArguments=1,
+            validationCmd=vcmd)
+        removeMaxButton = self.addOperation(
+            "Remove Max", lambda: self.clickRemoveMax())
+        heapifyButton = self.addOperation(
+            "Heapify", lambda: self.clickHeapify())
+        return [insertButton, newHeapButton, peekButton, randomFillButton, removeMaxButton, heapifyButton]
+   
 
-        return [insertButton, newHeapButton]
     
     def validArgument(self):
         entered_text = self.getArgument()
@@ -320,6 +548,49 @@ class Heap(VisualizationApp):
                 self.insert(val)
                 self.setMessage("Value {} inserted".format(val))
         self.clearArgument()
+        
+    def clickPeek(self):
+        if len(self.list) <= 0:
+            self.setMessage("Error! Heap is empty.")
+        else:
+            val = self.list[0].val
+            self.peek()
+            self.setMessage("{} is the root value!".format(val))
+            
+    def clickNewArray(self):
+        self.newArray()
+
+    def clickRemoveMax(self):
+        if len(self.list) == 0:
+            self.setMessage('Heap is empty!')
+
+        else:
+            val = self.list[0].val
+            self.removeMax()
+            self.setMessage("{} was removed!".format(val))
+
+
+    def clickRandomFill(self):
+        # if the animation is not stopped (it is running or paused):
+        if self.animationState != self.STOPPED:
+            # error message appears and insert will not take place
+            self.setMessage("Unable to insert at the moment")
+        else:
+            val = self.validArgument()
+            if val is None:
+                self.setMessage("Input value must be an integer from 1 to {}.".format(self.MAX_SIZE))
+            elif self.window.winfo_width() <= self.HEAP_X0 + (
+                    (len(self.list) + 1) * self.CELL_WIDTH):
+                self.setMessage("Error! No room to display")
+            elif 0 < val < 32:
+                self.randomFill(val)
+
+
+    def clickHeapify(self):
+        self.heapify()
+
+    
+    
 
 if __name__ == '__main__':
     # random.seed(3.14159)    # Use fixed seed for testing consistency
