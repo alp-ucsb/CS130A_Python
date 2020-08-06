@@ -204,7 +204,7 @@ class Heap(VisualizationApp):
         
         # arrows
         iIndex = self.createIndex(i, name='i', level=-1)
-        maxChildIndex = self.createIndex((i - 1) // 2, name='maxChild', level=-2)
+        maxChildIndex = self.createIndex(2 * i + 1, name='maxChild', level=-2)
         callEnviron |= set(iIndex + maxChildIndex)
            
         itemkey = item.val # key
@@ -230,25 +230,24 @@ class Heap(VisualizationApp):
             if (itemkey <      # If item i's key is less
                 self.list[maxi].val): # than max child's key,
                 print("max i's thing", self.list[maxi].display_val)
-                self.list[i] = self.list[maxi] # then move max child up
                 #i = maxi
                 
                 # move a copy of the child down to node i
                 print("this is i", i)
                 print('list[i] type', self.canvas.type(self.list[i].display_shape))
-                copyVal = (self.copyCanvasItem(self.list[i].display_shape),
-                           self.copyCanvasItem(self.list[i].display_val))
+                copyVal = (self.copyCanvasItem(self.list[maxi].display_shape),
+                           self.copyCanvasItem(self.list[maxi].display_val))
                 callEnviron |= set(copyVal)
                 self.moveItemsOnCurve(
                     copyVal, (self.cellCoords(i), self.cellCenter(i)),
                     startAngle=90 * 11 / (10 + i - maxi),
                     sleepTime=0.02)
-                self.list[maxi].val = self.list[i].val
-                self.list[maxi].color = self.list[i].color
-                self.canvas.delete(self.list[maxi].display_shape)
-                self.canvas.delete(self.list[maxi].display_val)
-                #self.list[maxi].display_shape, self.list[maxi].display_val = copyVal
-                callEnviron -= set(copyVal)
+                self.canvas.delete(self.list[i].display_shape)
+                self.canvas.delete(self.list[i].display_val)
+                self.list[i].val = self.list[maxi].val # then move max child up
+                self.list[i].color = self.list[maxi].color
+                self.list[i].display_shape, self.list[i].display_val = copyVal
+                callEnviron -= set(copyVal)    # retain copied value
                 
                 # Advance i to child, move original item along with i Index
                 delta = self.cellCenter(maxi)[1] - self.cellCenter(i)[1]
@@ -257,8 +256,6 @@ class Heap(VisualizationApp):
                  
             else:              # If item i's key is greater than or equal
                 break           # to larger child, then found position
-
-        self.list[i] = item   # Move item to its final position
 
         # Move copied item into appropriate location
         self.moveItemsBy(copyItem, multiply_vector(itemDelta, -1),
@@ -485,7 +482,7 @@ class Heap(VisualizationApp):
             # create display objects for the associated Drawables
             n.display_shape, n.display_val = self.createCellValue(
                 i, n.val, n.color)
-            n.color = self.canvas.itemconfigure(n.display_shape, 'fill')
+            n.color = self.canvas.itemconfigure(n.display_shape, 'fill')[-1]
 
     def fixPositions(self):  # Move canvas display items to exact cell coords
         for i, drawItem in enumerate(self.list):
@@ -530,6 +527,7 @@ class Heap(VisualizationApp):
             "Remove Max", lambda: self.clickRemoveMax())
         heapifyButton = self.addOperation(
             "Heapify", lambda: self.clickHeapify())
+        self.addAnimationButtons()
         return [insertButton, newHeapButton, peekButton, randomFillButton, removeMaxButton, heapifyButton]
    
 
