@@ -187,7 +187,7 @@ class Heap(VisualizationApp):
     
      
        
-    def siftDown(self, i=0):  # Sift item i down to preserve heap cond. defauly start at root node index
+    def siftDown(self, i=0):  # Sift item i down to preserve heap cond. default start at root node index
         
         firstLeaf = len(self.list)//2 # Get index of first leaf
         if i >= firstLeaf: 
@@ -229,12 +229,13 @@ class Heap(VisualizationApp):
             
             if (itemkey <      # If item i's key is less
                 self.list[maxi].val): # than max child's key,
+                print("max i's thing", self.list[maxi].display_val)
                 self.list[i] = self.list[maxi] # then move max child up
                 #i = maxi
                 
-                # move a copy of the childs down to node i
-                print('list[i]',self.list[i].display_val)
-                             
+                # move a copy of the child down to node i
+                print("this is i", i)
+                print('list[i] type', self.canvas.type(self.list[i].display_shape))
                 copyVal = (self.copyCanvasItem(self.list[i].display_shape),
                            self.copyCanvasItem(self.list[i].display_val))
                 callEnviron |= set(copyVal)
@@ -252,15 +253,13 @@ class Heap(VisualizationApp):
                 # Advance i to child, move original item along with i Index
                 delta = self.cellCenter(maxi)[1] - self.cellCenter(i)[1]
                 self.moveItemsBy(iIndex + copyItem, (0, delta), sleepTime=0.01)
-                i = maxi                
+                i = maxi
                  
             else:              # If item i's key is greater than or equal
                 break           # to larger child, then found position
-            
-           
-            
+
         self.list[i] = item   # Move item to its final position
-        
+
         # Move copied item into appropriate location
         self.moveItemsBy(copyItem, multiply_vector(itemDelta, -1),
                          sleepTime=0.01)
@@ -268,12 +267,16 @@ class Heap(VisualizationApp):
         self.canvas.delete(self.list[i].display_val)
         self.list[i].val, self.list[i].color = item.val, item.color
         self.list[i].display_shape, self.list[i].display_val = copyItem
-        
+
+        for i in self.list:
+            print(i.val, " ", end="")
+
         callEnviron -= set(copyItem)
         self.cleanUp(callEnviron)        
     
     
     def heapify(self, N = None):  # Organize an array of N items to satisfy the heap condition using keys extracted from the items by the key function
+        callEnviron = self.createCallEnvironment()
         if N is None:            # If N is not supplied,
             N = len(self.list)   # then use number of items in list
         heapLo = N // 2          # The heap lies in the range [heapLo, N)
@@ -286,7 +289,9 @@ class Heap(VisualizationApp):
             self.siftDown(heapLo) # Sift down item at heapLo
         print('list after')
         for i in self.list:
-            print(i.val, " ", end="")       
+            print(i.val, " ", end="")
+
+        self.cleanUp(callEnviron)
               
     # lets user input an int argument that determines max size of the Heap
     def newArray(self):
