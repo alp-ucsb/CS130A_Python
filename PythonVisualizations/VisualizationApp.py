@@ -446,7 +446,6 @@ class VisualizationApp(object):  # Base class for Python visualizations
 
     def copyCanvasItem(      # Make a copy of an item in the canvas
             self, canvasitem):
-        print("self.canvas", self.canvas.type(canvasitem))
         creator = getattr(self.canvas,  # Get canvas creation function for type
                           'create_{}'.format(self.canvas.type(canvasitem)))
         newItem = creator(*self.canvas.coords(canvasitem),

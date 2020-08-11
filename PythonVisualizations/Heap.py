@@ -209,8 +209,6 @@ class Heap(VisualizationApp):
            
         itemkey = item.val # key
         while i < firstLeaf:  # While i above leaf level, find children
-            print('new round')
-            print(self.list[i].val)
             left = (2*i)+1
             right = (2*i)+2
             maxi = left        # Assume left child has larger key
@@ -219,8 +217,6 @@ class Heap(VisualizationApp):
                 self.list[left].val < # left child has smaller key
                 self.list[right].val): 
                 maxi = right    # then use right child
-            
-            print('maxi', maxi)
 
             delta = self.cellCenter(maxi)[1] - self.canvas.coords(maxChildIndex[0])[1]  
             if delta != 0:      # Move child index pointer
@@ -229,18 +225,13 @@ class Heap(VisualizationApp):
             
             if (itemkey <      # If item i's key is less
                 self.list[maxi].val): # than max child's key,
-                print("max i's thing", self.list[maxi].display_val)
-                #i = maxi
-                
+
                 # move a copy of the child down to node i
-                print("this is i", i)
-                print('list[i] type', self.canvas.type(self.list[i].display_shape))
                 copyVal = (self.copyCanvasItem(self.list[maxi].display_shape),
                            self.copyCanvasItem(self.list[maxi].display_val))
                 callEnviron |= set(copyVal)
                 self.moveItemsOnCurve(
                     copyVal, (self.cellCoords(i), self.cellCenter(i)),
-                    startAngle=90 * 11 / (10 + i - maxi),
                     sleepTime=0.02)
                 self.canvas.delete(self.list[i].display_shape)
                 self.canvas.delete(self.list[i].display_val)
@@ -265,28 +256,17 @@ class Heap(VisualizationApp):
         self.list[i].val, self.list[i].color = item.val, item.color
         self.list[i].display_shape, self.list[i].display_val = copyItem
 
-        for i in self.list:
-            print(i.val, " ", end="")
-
         callEnviron -= set(copyItem)
         self.cleanUp(callEnviron)        
-    
-    
+
     def heapify(self, N = None):  # Organize an array of N items to satisfy the heap condition using keys extracted from the items by the key function
         callEnviron = self.createCallEnvironment()
         if N is None:            # If N is not supplied,
             N = len(self.list)   # then use number of items in list
         heapLo = N // 2          # The heap lies in the range [heapLo, N)
-        print('list before')
-        for i in self.list:
-            print(i.val," ", end="")
-        print()
         while heapLo > 0:        # Heapify until the entire array is a heap
             heapLo -= 1           # Decrement heap's lower boundary
             self.siftDown(heapLo) # Sift down item at heapLo
-        print('list after')
-        for i in self.list:
-            print(i.val, " ", end="")
 
         self.cleanUp(callEnviron)
               
@@ -582,8 +562,8 @@ class Heap(VisualizationApp):
             val = self.validArgument()
             if val is None:
                 self.setMessage("Input value must be an integer from 1 to {}.".format(self.MAX_SIZE))
-            elif self.window.winfo_width() <= self.HEAP_X0 + (
-                    (len(self.list) + 1) * self.CELL_WIDTH):
+            elif self.window.winfo_height() <= self.HEAP_Y0 + (
+                    val * self.CELL_HEIGHT):
                 self.setMessage("Error! No room to display")
             elif 0 < val < 32:
                 self.randomFill(val)
@@ -592,8 +572,6 @@ class Heap(VisualizationApp):
     def clickHeapify(self):
         self.heapify()
 
-    
-    
 
 if __name__ == '__main__':
     # random.seed(3.14159)    # Use fixed seed for testing consistency
