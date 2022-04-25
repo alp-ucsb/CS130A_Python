@@ -13,7 +13,7 @@ class drawnValue(object):
     __fields = ('val', 'items')
     __legacy_fields = ('display_shape', 'display_val')
 
-    def __getitem__(self, key): # Implement positIonal access
+    def __getitem__(self, key): # Implement positional access
         if isinstance(key, int):
             if 0 == key:        # Index 0 is value
                 return self.val
